@@ -16,9 +16,9 @@ import net.minecraft.world.level.biome.AmbientMoodSettings;
 import net.minecraft.world.level.biome.AmbientParticleSettings;
 import org.bukkit.Registry;
 import org.bukkit.Sound;
-import org.bukkit.craftbukkit.v1_19_R3.CraftParticle;
-import org.bukkit.craftbukkit.v1_19_R3.CraftSound;
-import org.bukkit.craftbukkit.v1_19_R3.util.CraftNamespacedKey;
+import org.bukkit.craftbukkit.v1_20_R1.CraftParticle;
+import org.bukkit.craftbukkit.v1_20_R1.CraftSound;
+import org.bukkit.craftbukkit.v1_20_R1.util.CraftNamespacedKey;
 
 import java.lang.reflect.Field;
 import java.util.Objects;

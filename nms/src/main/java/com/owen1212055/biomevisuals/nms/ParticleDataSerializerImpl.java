@@ -5,7 +5,7 @@ import com.mojang.serialization.JsonOps;
 import com.owen1212055.biomevisuals.api.types.biome.effect.ParticleDataSerializer;
 import net.minecraft.core.particles.ParticleTypes;
 import org.bukkit.Particle;
-import org.bukkit.craftbukkit.v1_19_R3.CraftParticle;
+import org.bukkit.craftbukkit.v1_20_R1.CraftParticle;
 
 public class ParticleDataSerializerImpl implements ParticleDataSerializer {
     @Override
