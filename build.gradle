@@ -1,0 +1,39 @@
+plugins {
+    id("io.papermc.paperweight.userdev") version "1.5.6-SNAPSHOT"
+    id 'java'
+    id "maven-publish"
+    id 'java-library'
+    id("xyz.jpenilla.run-paper") version "2.0.1"
+
+}
+
+apply from: 'https://raw.githubusercontent.com/UnRealDinnerbone/GradleHelpers/helpers/base.gradle'
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+repositories {
+    maven {
+        url("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+    }
+    maven { url "https://repo.dmulloy2.net/repository/public/" }
+
+}
+
+dependencies {
+    paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.20.1-R0.1-SNAPSHOT")
+    implementation("xyz.jpenilla:reflection-remapper:0.1.0-SNAPSHOT")
+    implementation("xyz.jpenilla:reflection-remapper:0.1.0-SNAPSHOT")
+}
+
+//https://github.com/packet-loss-gaming/Hackbook/blob/b21a8fc3630d41236099ddd7d64ab2e688ddd08f/build.gradle#L33
+// Butcher the dev jar so as to publish a properly obfuscated jar
+def javaComponent = components.java as AdhocComponentWithVariants
+javaComponent.withVariantsFromConfiguration(configurations.apiElements) {
+    skip()
+}
+javaComponent.withVariantsFromConfiguration(configurations.runtimeElements) {
+    skip()
+}
+javaComponent.addVariantsFromConfiguration(configurations.reobf) {
+    mapToMavenScope("compile")
+}
