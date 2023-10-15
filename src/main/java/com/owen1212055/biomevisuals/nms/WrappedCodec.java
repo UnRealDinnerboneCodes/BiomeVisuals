@@ -1,6 +1,5 @@
 package com.owen1212055.biomevisuals.nms;
 
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -38,8 +37,6 @@ public record WrappedCodec(Codec<RegistryAccess> capturedCodec, DynamicOps<JsonE
 
         Optional<DataResult.PartialResult<JsonElement>> optionalError = dataResult.error();
         if (optionalError.isPresent()) {
-            LOGGER.error("How did this happen?");
-            LOGGER.error("Something?? ", new RuntimeException("Test"));
             LOGGER.warn("Failed to encode to JSON: " + optionalError.get().message());
             LOGGER.info("Sending client default data instead to circumvent this.");
             return capturedCodec.encode(input, ops, prefix);
