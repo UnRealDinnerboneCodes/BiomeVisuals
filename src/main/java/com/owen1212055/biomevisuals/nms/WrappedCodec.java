@@ -55,7 +55,6 @@ public record WrappedCodec(Codec<RegistryAccess> capturedCodec, DynamicOps<JsonE
         }
 
         // Decode it back into NMS type from json
-        System.out.println(new GsonBuilder().create().toJson(mainRegistry));
         DataResult<Pair<RegistryAccess, JsonElement>> dataresult = capturedCodec.decode(dynamicOps, mainRegistry);
         // Fail?
         if (dataresult.error().isPresent()) {
@@ -114,9 +113,6 @@ public record WrappedCodec(Codec<RegistryAccess> capturedCodec, DynamicOps<JsonE
             }
 
             for (Map.Entry<NamespacedKey, Object> overriddenEntry : registryEntries.entrySet()) {
-                if(overriddenEntry.getKey().toString().equals("minecraft:plains")) {
-                    System.out.println("Plains");
-                }
                 JsonObject registryEntryHolder = registryEntryHolders.get(overriddenEntry.getKey());
 
                 // Only replace if present to prevent handlers that add new registry entries from having any effect.
