@@ -38,6 +38,7 @@ public record WrappedCodec(Codec<RegistryAccess> capturedCodec, DynamicOps<JsonE
 
         Optional<DataResult.PartialResult<JsonElement>> optionalError = dataResult.error();
         if (optionalError.isPresent()) {
+            LOGGER.error("Something?? ", new RuntimeException("Test"));
             LOGGER.warn("Failed to encode to JSON: " + optionalError.get().message());
             LOGGER.info("Sending client default data instead to circumvent this.");
             return capturedCodec.encode(input, ops, prefix);
