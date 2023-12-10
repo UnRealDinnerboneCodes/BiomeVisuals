@@ -1,5 +1,6 @@
 package com.owen1212055.biomevisuals.nms;
 
+import com.destroystokyo.paper.ParticleBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
@@ -10,8 +11,7 @@ import com.mojang.serialization.JsonOps;
 import com.owen1212055.biomevisuals.api.types.biome.effect.*;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
@@ -19,11 +19,15 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.level.biome.AmbientAdditionsSettings;
 import net.minecraft.world.level.biome.AmbientMoodSettings;
 import net.minecraft.world.level.biome.AmbientParticleSettings;
+import org.bukkit.Color;
+import org.bukkit.Particle;
 import org.bukkit.Registry;
 import org.bukkit.Sound;
-import org.bukkit.craftbukkit.v1_20_R1.CraftSound;
-import org.bukkit.craftbukkit.v1_20_R1.util.CraftNamespacedKey;
+import org.bukkit.craftbukkit.v1_20_R3.CraftParticle;
+import org.bukkit.craftbukkit.v1_20_R3.CraftSound;
+import org.bukkit.craftbukkit.v1_20_R3.util.CraftNamespacedKey;
 import org.jetbrains.annotations.ApiStatus;
+import org.joml.Vector3f;
 
 import java.lang.reflect.Field;
 import java.util.Objects;
@@ -44,7 +48,7 @@ public class ApiEntityConverter {
     }
 
     public static JsonElement serialize(AdditionSound sound) {
-        AmbientAdditionsSettings settings = new AmbientAdditionsSettings(Holder.direct(CraftSound.getSoundEffect(sound.soundEvent())), sound.tickChance());
+        AmbientAdditionsSettings settings = new AmbientAdditionsSettings(Holder.direct(CraftSound.bukkitToMinecraft(sound.soundEvent())), sound.tickChance());
 
         return encode(AmbientAdditionsSettings.CODEC, settings);
     }
@@ -56,8 +60,8 @@ public class ApiEntityConverter {
     }
 
     public static JsonElement serialize(AmbientParticle particle) {
-        ParticleOptions options = decode(ParticleTypes.CODEC, particle.getParticle());
-        AmbientParticleSettings settings = new AmbientParticleSettings(options, particle.getProbability());
+        ParticleOptions options = CraftParticle.createParticleParam(particle.particle().particle(), particle.particle().data());
+        AmbientParticleSettings settings = new AmbientParticleSettings(options, particle.probability());
 
         return encode(AmbientParticleSettings.CODEC, settings);
     }
@@ -65,12 +69,45 @@ public class ApiEntityConverter {
     public static AmbientParticle deserializeAmbientParticle(JsonElement particle) {
         AmbientParticleSettings settings = decode(AmbientParticleSettings.CODEC, particle);
 
+        ParticleOptions options = settings.getOptions();
+
+
         try {
-            return AmbientParticle.of((float) probabilityField.get(settings), (JsonObject) encode(ParticleTypes.CODEC, settings.getOptions()));
+            return AmbientParticle.of(new ParticleBuilder(CraftParticle.minecraftToBukkit(options.getType())).data(convertOptionsToType(options)), (float) probabilityField.get(settings));
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }
+
+    public static Object convertOptionsToType(ParticleOptions particleOptions) {
+        if(particleOptions instanceof BlockParticleOption blockParticleOption) {
+            return blockParticleOption.getState().createCraftBlockData();
+        }else if(particleOptions instanceof DustColorTransitionOptions dustColorTransitionOptions) {
+            return new Particle.DustTransition(fromVec3(dustColorTransitionOptions.getFromColor()),
+                    fromVec3(dustColorTransitionOptions.getToColor()),
+                    dustColorTransitionOptions.getScale());
+        }else if(particleOptions instanceof DustParticleOptions dustParticleOptions) {
+            return new Particle.DustOptions(fromVec3(dustParticleOptions.getColor()), dustParticleOptions.getScale());
+        }else if(particleOptions instanceof ItemParticleOption itemParticleOption) {
+            return itemParticleOption.getItem().asBukkitMirror();
+        }else if(particleOptions instanceof SculkChargeParticleOptions sculkChargeParticleOptions) {
+            return sculkChargeParticleOptions.roll();
+        }else if(particleOptions instanceof ShriekParticleOption shriekParticleOption) {
+            return shriekParticleOption.getDelay();
+        }else if(particleOptions instanceof SimpleParticleType simpleParticleType) {
+            return null;
+        }else if(particleOptions instanceof VibrationParticleOption vibrationParticleOption) {
+            throw new UnsupportedOperationException("VibrationParticleOption is not supported");
+        }else {
+            throw new UnsupportedOperationException("Unknown ParticleOption: " + particleOptions.getClass().getName());
+        }
+    }
+
+    public static Color fromVec3(Vector3f vec3) {
+        return Color.fromRGB((int) (vec3.x() * 255), (int) (vec3.y() * 255), (int) (vec3.z() * 255));
+    }
+
+
 
     public static JsonElement serialize(AmbientSound ambientSound) {
         SoundEvent soundEvent = SoundEvent.createVariableRangeEvent(new ResourceLocation(ambientSound.getSoundEvent().getKey().toString()));
@@ -85,7 +122,7 @@ public class ApiEntityConverter {
     }
 
     public static JsonElement serialize(MoodSound moodSound) {
-        AmbientMoodSettings settings = new AmbientMoodSettings(Holder.direct(CraftSound.getSoundEffect(moodSound.soundEvent())), moodSound.tickDelay(), moodSound.blockSearchExtent(), moodSound.soundPositionOffset());
+        AmbientMoodSettings settings = new AmbientMoodSettings(Holder.direct(CraftSound.bukkitToMinecraft(moodSound.soundEvent())), moodSound.tickDelay(), moodSound.blockSearchExtent(), moodSound.soundPositionOffset());
 
         return encode(AmbientMoodSettings.CODEC, settings);
     }
@@ -97,7 +134,7 @@ public class ApiEntityConverter {
     }
 
     public static JsonElement serialize(Music music) {
-        net.minecraft.sounds.Music nmsMusic = new net.minecraft.sounds.Music(Holder.direct(CraftSound.getSoundEffect(music.getSoundEvent())), music.getMinDelay(), music.getMaxDelay(), music.replaceCurrentMusic());
+        net.minecraft.sounds.Music nmsMusic = new net.minecraft.sounds.Music(Holder.direct(CraftSound.bukkitToMinecraft(music.getSoundEvent())), music.getMinDelay(), music.getMaxDelay(), music.replaceCurrentMusic());
 
         return encode(net.minecraft.sounds.Music.CODEC, nmsMusic);
     }

@@ -3,5 +3,3 @@ version: '1.4.2'
 main: com.owen1212055.biomevisuals.Main
 api-version: 1.20
 authors: [ Owen1212055 ]
-depend:
-  - ProtocolLib
