@@ -19,16 +19,24 @@ repositories {
 
 }
 
+configurations {
+    apiLike
+    apiElements.extendsFrom apiLike
+}
+
 dependencies {
     paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.20.4-R0.1-SNAPSHOT")
     implementation("xyz.jpenilla:reflection-remapper:0.1.0-SNAPSHOT")
+//    ("com.unrealdinnerbone:Crafty:1.0.1")
+    apiLike("com.unrealdinnerbone:Crafty:1.0.1")
+    compileOnly("com.unrealdinnerbone:CraftySource:1.0.1")
 }
 
 //https://github.com/packet-loss-gaming/Hackbook/blob/b21a8fc3630d41236099ddd7d64ab2e688ddd08f/build.gradle#L33
 // Butcher the dev jar so as to publish a properly obfuscated jar
 def javaComponent = components.java as AdhocComponentWithVariants
 javaComponent.withVariantsFromConfiguration(configurations.apiElements) {
-    skip()
+//    skip()
 }
 javaComponent.withVariantsFromConfiguration(configurations.runtimeElements) {
     skip()

@@ -9,6 +9,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.owen1212055.biomevisuals.api.types.biome.effect.*;
+import com.unrealdinnerbone.crafty.particle.CraftyParticle;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.particles.*;
@@ -60,7 +61,7 @@ public class ApiEntityConverter {
     }
 
     public static JsonElement serialize(AmbientParticle particle) {
-        ParticleOptions options = CraftParticle.createParticleParam(particle.particle().particle(), particle.particle().data());
+        ParticleOptions options = CraftParticle.createParticleParam(particle.particle().getParticle(), particle.particle().getData());
         AmbientParticleSettings settings = new AmbientParticleSettings(options, particle.probability());
 
         return encode(AmbientParticleSettings.CODEC, settings);
@@ -71,38 +72,14 @@ public class ApiEntityConverter {
 
         ParticleOptions options = settings.getOptions();
 
+        CraftyParticle craftyParticle = new CraftyParticle(options);
 
         try {
-            return AmbientParticle.of(new ParticleBuilder(CraftParticle.minecraftToBukkit(options.getType())).data(convertOptionsToType(options)), (float) probabilityField.get(settings));
+            return AmbientParticle.of(craftyParticle, (float) probabilityField.get(settings));
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }
-
-    public static Object convertOptionsToType(ParticleOptions particleOptions) {
-        if(particleOptions instanceof BlockParticleOption blockParticleOption) {
-            return blockParticleOption.getState().createCraftBlockData();
-        }else if(particleOptions instanceof DustColorTransitionOptions dustColorTransitionOptions) {
-            return new Particle.DustTransition(fromVec3(dustColorTransitionOptions.getFromColor()),
-                    fromVec3(dustColorTransitionOptions.getToColor()),
-                    dustColorTransitionOptions.getScale());
-        }else if(particleOptions instanceof DustParticleOptions dustParticleOptions) {
-            return new Particle.DustOptions(fromVec3(dustParticleOptions.getColor()), dustParticleOptions.getScale());
-        }else if(particleOptions instanceof ItemParticleOption itemParticleOption) {
-            return itemParticleOption.getItem().asBukkitMirror();
-        }else if(particleOptions instanceof SculkChargeParticleOptions sculkChargeParticleOptions) {
-            return sculkChargeParticleOptions.roll();
-        }else if(particleOptions instanceof ShriekParticleOption shriekParticleOption) {
-            return shriekParticleOption.getDelay();
-        }else if(particleOptions instanceof SimpleParticleType simpleParticleType) {
-            return null;
-        }else if(particleOptions instanceof VibrationParticleOption vibrationParticleOption) {
-            throw new UnsupportedOperationException("VibrationParticleOption is not supported");
-        }else {
-            throw new UnsupportedOperationException("Unknown ParticleOption: " + particleOptions.getClass().getName());
-        }
-    }
-
     public static Color fromVec3(Vector3f vec3) {
         return Color.fromRGB((int) (vec3.x() * 255), (int) (vec3.y() * 255), (int) (vec3.z() * 255));
     }
