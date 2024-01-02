@@ -77,6 +77,11 @@ public class BiomeDataBuilder {
         return this;
     }
 
+    public BiomeDataBuilder precipitation(boolean precipitation) {
+        this.hasPrecipitation = precipitation;
+        return this;
+    }
+
     @NotNull
     public BiomeData build() {
         return new BiomeData(hasPrecipitation, temperature, temperatureModifier, downfall, effect);
