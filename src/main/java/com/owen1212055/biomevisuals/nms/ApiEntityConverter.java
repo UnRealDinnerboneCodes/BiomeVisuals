@@ -9,7 +9,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.owen1212055.biomevisuals.api.types.biome.effect.*;
-import com.unrealdinnerbone.crafty.particle.CraftyParticle;
+import com.unrealdinnerbone.crafty.nms.CraftyParticle;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.particles.*;

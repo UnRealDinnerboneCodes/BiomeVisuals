@@ -25,11 +25,10 @@ configurations {
 }
 
 dependencies {
-    paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.20.4-R0.1-SNAPSHOT")
+    paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:${paperVersion}")
     implementation("xyz.jpenilla:reflection-remapper:0.1.0-SNAPSHOT")
-//    ("com.unrealdinnerbone:Crafty:1.0.1")
-    apiLike("com.unrealdinnerbone:Crafty:1.1.3")
-    compileOnly("com.unrealdinnerbone:CraftySource:1.1.3")
+    apiLike("com.unrealdinnerbone:Crafty:${craftyVersion}")
+    compileOnly("com.unrealdinnerbone:CraftySource:${craftyVersion}")
 }
 
 //https://github.com/packet-loss-gaming/Hackbook/blob/b21a8fc3630d41236099ddd7d64ab2e688ddd08f/build.gradle#L33
